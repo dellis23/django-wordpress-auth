@@ -60,7 +60,7 @@ Make sure it's placed somewhere after the session middleware.
     MIDDLEWARE_CLASSES = (
         'django.contrib.sessions.middleware.SessionMiddleware',
         # ...
-        'django_wordpress_auth.middleware.WordpressAuthMiddleware',
+        'wordpress_auth.middleware.WordpressAuthMiddleware',
     )
 
 Finally, add `wordpress_auth` to INSTALLED_APPS.
@@ -96,7 +96,7 @@ You can restrict a view to a capability as well.
     def my_view():
         pass
 
-Finally, the middleware provides access to the wordpress user via ``request.wordpress_user``.
+Finally, the middleware provides access to the WordPress user via ``request.wordpress_user``.
 
 See ``models.py`` for full reference.  Some of the redundant naming conventions
-in the wordpress database have been made simpler as well.
+in the WordPress database have been made simpler as well.
