@@ -5,7 +5,7 @@ Django Wordpress Auth
 Introduction
 ============
 
-Allows for access in Django to a Wordpress installation for checking for 
+Allows for access in Django to a WordPress installation for checking for
 things like login status and roles / capabilities.
 
 Requirements
@@ -27,14 +27,14 @@ Wordpress Dependencies :
 Installation
 ============
 
-Add your wordpress's auth keys and salts (found in wp-config.php).
+Add your WordPress's auth keys and salts (found in wp-config.php) to your settings.py.
 
 .. sourcecode:: python
 
-    LOGGED_IN_KEY = "rs&^D%jPdu=vk|VVDsdfsdgsdgsdg9sd87f98s7h[Xm$3gT/@1xdasd"
-    LOGGED_IN_SALT = "3]x^n{d8=su23902iu09jdc09asjd09asjd09jasdV-Lv-OydAQ%?~"
+    WORDPRESS_LOGGED_IN_KEY = "rs&^D%jPdu=vk|VVDsdfsdgsdgsdg9sd87f98s7h[Xm$3gT/@1xdasd"
+    WORDPRESS_LOGGED_IN_SALT = "3]x^n{d8=su23902iu09jdc09asjd09asjd09jasdV-Lv-OydAQ%?~"
 
-Add your wordpress database.
+Add your WordPress database to DATABASES in settings.py.
 
 .. sourcecode:: python
 
@@ -45,15 +45,15 @@ Add your wordpress database.
         'wordpress': {  # must be named 'wordpress'
             'ENGINE': 'django.db.backends.mysql',
             'NAME': 'wordpress',
-            'USER': 'XXX',
-            'PASSWORD': 'XXX',
-            'HOST': '',
-            'PORT': '',
+            'USER': '...',
+            'PASSWORD': '...',
+            'HOST': '...',
+            'PORT': 3306,
         }
     }
 
-Add the middleware.  Make sure it's placed somewhere after the session
-middleware.
+Add the middleware to MIDDLEWARE_CLASSES in settings.py.
+Make sure it's placed somewhere after the session middleware.
 
 .. sourcecode:: python
 
@@ -63,13 +63,13 @@ middleware.
         'django_wordpress_auth.middleware.WordpressAuthMiddleware',
     )
 
-Finally, add to installed apps.
+Finally, add `wordpress_auth` to INSTALLED_APPS.
 
 .. sourcecode:: python
 
     INSTALLED_APPS = (
         # ...
-        'django_wordpress_auth',
+        'wordpress_auth',
     )
 
 Usage
@@ -96,8 +96,7 @@ You can restrict a view to a capability as well.
     def my_view():
         pass
 
-Finally, the middleware provides access to the wordpress user via
-``request.wordpress_user``.
+Finally, the middleware provides access to the wordpress user via ``request.wordpress_user``.
 
 See ``models.py`` for full reference.  Some of the redundant naming conventions
 in the wordpress database have been made simpler as well.

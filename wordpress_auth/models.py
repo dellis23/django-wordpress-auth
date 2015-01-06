@@ -1,6 +1,8 @@
+import phpserialize
+
 from django.db import models
 
-import phpserialize
+from wordpress_auth import WORDPRESS_TABLE_PREFIX
 
 
 class WpOptions(models.Model):
@@ -10,7 +12,9 @@ class WpOptions(models.Model):
     autoload = models.CharField(max_length=60)
 
     class Meta:
-        db_table = u'wp_options'
+        db_table = WORDPRESS_TABLE_PREFIX + 'options'
+        managed = False
+
 
 class WpUsermeta(models.Model):
     umeta_id = models.BigIntegerField(primary_key=True)
@@ -19,7 +23,9 @@ class WpUsermeta(models.Model):
     meta_value = models.TextField(blank=True)
 
     class Meta:
-        db_table = u'wp_usermeta'
+        db_table = WORDPRESS_TABLE_PREFIX + 'usermeta'
+        managed = False
+
 
 class WpUsers(models.Model):
     # Field name made lowercase.
@@ -37,10 +43,11 @@ class WpUsers(models.Model):
     display_name = models.CharField(max_length=750, db_column='display_name')
 
     class Meta:
-        db_table = u'wp_users'
+        db_table = WORDPRESS_TABLE_PREFIX + 'users'
+        managed = False
 
     def __str__(self):
-        return str(self.login)
+        return self.login
 
     @property
     def roles(self):
@@ -54,7 +61,7 @@ class WpUsers(models.Model):
     def capabilities(self):
         capabilities = []
         roles_data = phpserialize.loads(
-            WpOptions.objects.using('wordpress')\
+            WpOptions.objects.using('wordpress')
             .get(option_name='wp_user_roles').option_value)
         for role in self.roles:
             role_capabilities = roles_data.get(role).get('capabilities')

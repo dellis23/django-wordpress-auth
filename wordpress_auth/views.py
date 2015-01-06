@@ -1,8 +1,9 @@
 from django.http import HttpResponse
 
-from . import get_wordpress_user
-from decorators import wordpress_login_required, wordpress_requires_role, \
-                       wordpress_requires_capability
+from wordpress_auth.decorators import (
+    wordpress_login_required, wordpress_requires_role,
+    wordpress_requires_capability
+)
 
 
 @wordpress_login_required
