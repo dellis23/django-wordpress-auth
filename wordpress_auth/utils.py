@@ -12,8 +12,10 @@ from wordpress_auth.models import WpOptions, WpUsers
 
 
 def get_site_url():
-    return WpOptions.objects.using('wordpress') \
+    url = WpOptions.objects.using('wordpress') \
         .get(option_name='siteurl').option_value
+
+    return _untrailingslashit(url)
 
 
 def get_login_url():
@@ -30,6 +32,10 @@ def get_wordpress_user(request):
 
         if hmac == _generate_auth_cookie(username, user.password, expires):
             return user
+
+
+def _untrailingslashit(str):
+    return str.rstrip('/\\')
 
 
 def _hmac(*args, **kwargs):
