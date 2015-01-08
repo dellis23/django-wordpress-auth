@@ -1,11 +1,11 @@
 import hmac
 import hashlib
+from time import time
 
 try:
-    from urllib.parse import urljoin, unquote
+    from urllib.parse import urljoin
 except ImportError:
     from urlparse import urljoin  # Python 2
-    from urllib2 import unquote
 
 from wordpress_auth import WORDPRESS_LOGGED_IN_KEY, WORDPRESS_LOGGED_IN_SALT
 from wordpress_auth.models import WpOptions, WpUsers
@@ -27,25 +27,55 @@ def get_wordpress_user(request):
     cookie = request.COOKIES.get('wordpress_logged_in_' + cookie_hash)
 
     if cookie:
-        username, expires, hmac = unquote(cookie).split('|')
-        user = WpUsers.objects.using('wordpress').get(login=username)
-
-        if hmac == _generate_auth_cookie(username, user.password, expires):
-            return user
+        return _validate_auth_cookie(cookie)
 
 
 def _untrailingslashit(str):
     return str.rstrip('/\\')
 
 
-def _hmac(*args, **kwargs):
-    kwargs['digestmod'] = hashlib.md5
-    return hmac.new(*args, **kwargs).hexdigest()
+def _parse_auth_cookie(cookie):
+    elements = cookie.split('|')
+    return elements if len(elements) == 4 else None
 
 
-def _generate_auth_cookie(username, password, expires):
-    wp_salt = WORDPRESS_LOGGED_IN_KEY + WORDPRESS_LOGGED_IN_SALT
-    wp_hash = _hmac(wp_salt, username + password[8:12] + "|" + expires)
-    cookie = _hmac(wp_hash, username + "|" + expires)
+def _validate_auth_cookie(cookie):
+    cookie_elements = _parse_auth_cookie(cookie)
 
-    return cookie
+    if not cookie_elements:
+        return False
+
+    username, expiration, token, cookie_hmac = cookie_elements
+
+    # Quick check to see if an honest cookie has expired
+    if float(expiration) < time():
+        return False
+
+    # Check if a bad username was entered in the user authentication process
+    try:
+        user = WpUsers.objects.using('wordpress').get(login=username)
+    except WpUsers.DoesNotExist:
+        return False
+
+    # Check if a bad authentication cookie hash was encountered
+    pwd_frag = user.password[8:12]
+    key_salt = WORDPRESS_LOGGED_IN_KEY + WORDPRESS_LOGGED_IN_SALT
+    key_msg = '{}|{}|{}|{}'.format(username, pwd_frag, expiration, token)
+    key = hmac.new(key_salt.encode(), key_msg.encode(), digestmod=hashlib.md5) \
+        .hexdigest()
+
+    hash_msg = '{}|{}|{}'.format(username, expiration, token)
+    hash = hmac.new(key.encode(), hash_msg.encode(), digestmod=hashlib.sha256) \
+        .hexdigest()
+
+    if hash != cookie_hmac:
+        return False
+
+    # *sigh* we're almost there
+    # Check if the token is valid for the given user
+    verifier = hashlib.sha256(token.encode()).hexdigest().encode()
+
+    if verifier not in user.get_session_tokens():
+        return False
+
+    return user

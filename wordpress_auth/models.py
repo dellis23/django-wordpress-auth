@@ -17,8 +17,9 @@ class WpOptions(models.Model):
 
 
 class WpUsermeta(models.Model):
-    umeta_id = models.BigIntegerField(primary_key=True)
-    user_id = models.BigIntegerField()
+    id = models.BigIntegerField(db_column='umeta_id', primary_key=True)
+    user = models.ForeignKey('wordpress_auth.WpUsers', db_column='user_id',
+        related_name='meta')
     meta_key = models.CharField(max_length=765, blank=True)
     meta_value = models.TextField(blank=True)
 
@@ -69,3 +70,10 @@ class WpUsers(models.Model):
                 if enabled:
                     capabilities.append(capability)
         return set(capabilities)
+
+    def get_session_tokens(self):
+        """Retrieve all sessions of the user."""
+        opt = self.meta.using('wordpress').get(meta_key='session_tokens') \
+            .meta_value.encode()
+
+        return phpserialize.loads(opt)
