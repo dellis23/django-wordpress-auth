@@ -80,7 +80,7 @@ To restrict a view to a certain role, simply wrap the view in the
 
 .. sourcecode:: python
 
-    from django_wordpress_auth.decorators import wordpress_requires_role
+    from wordpress_auth.decorators import wordpress_requires_role
 
     @wordpress_requires_role('my_role')
     def my_view():
@@ -90,7 +90,7 @@ You can restrict a view to a capability as well.
 
 .. sourcecode:: python
 
-    from django_wordpress_auth.decorators import wordpress_requires_capability
+    from wordpress_auth.decorators import wordpress_requires_capability
 
     @wordpress_requires_capability('my_capability')
     def my_view():
