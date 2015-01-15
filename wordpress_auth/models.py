@@ -1,6 +1,8 @@
+import phpserialize
+
 from django.db import models
 
-import phpserialize
+from wordpress_auth import WORDPRESS_TABLE_PREFIX
 
 
 class WpOptions(models.Model):
@@ -10,16 +12,21 @@ class WpOptions(models.Model):
     autoload = models.CharField(max_length=60)
 
     class Meta:
-        db_table = u'wp_options'
+        db_table = WORDPRESS_TABLE_PREFIX + 'options'
+        managed = False
+
 
 class WpUsermeta(models.Model):
-    umeta_id = models.BigIntegerField(primary_key=True)
-    user_id = models.BigIntegerField()
+    id = models.BigIntegerField(db_column='umeta_id', primary_key=True)
+    user = models.ForeignKey('wordpress_auth.WpUsers', db_column='user_id',
+        related_name='meta')
     meta_key = models.CharField(max_length=765, blank=True)
     meta_value = models.TextField(blank=True)
 
     class Meta:
-        db_table = u'wp_usermeta'
+        db_table = WORDPRESS_TABLE_PREFIX + 'usermeta'
+        managed = False
+
 
 class WpUsers(models.Model):
     # Field name made lowercase.
@@ -37,10 +44,11 @@ class WpUsers(models.Model):
     display_name = models.CharField(max_length=750, db_column='display_name')
 
     class Meta:
-        db_table = u'wp_users'
+        db_table = WORDPRESS_TABLE_PREFIX + 'users'
+        managed = False
 
     def __str__(self):
-        return str(self.login)
+        return self.login
 
     @property
     def roles(self):
@@ -54,7 +62,7 @@ class WpUsers(models.Model):
     def capabilities(self):
         capabilities = []
         roles_data = phpserialize.loads(
-            WpOptions.objects.using('wordpress')\
+            WpOptions.objects.using('wordpress')
             .get(option_name='wp_user_roles').option_value)
         for role in self.roles:
             role_capabilities = roles_data.get(role).get('capabilities')
@@ -62,3 +70,10 @@ class WpUsers(models.Model):
                 if enabled:
                     capabilities.append(capability)
         return set(capabilities)
+
+    def get_session_tokens(self):
+        """Retrieve all sessions of the user."""
+        opt = self.meta.using('wordpress').get(meta_key='session_tokens') \
+            .meta_value.encode()
+
+        return phpserialize.loads(opt)
