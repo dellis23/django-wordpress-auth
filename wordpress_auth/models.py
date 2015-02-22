@@ -52,23 +52,29 @@ class WpUsers(models.Model):
 
     @property
     def roles(self):
-        """ Returns a list of all roles for the user. """
-        php_serialized_roles = WpUsermeta.objects.using('wordpress').get(
-            user_id=self.id, meta_key='wp_capabilities').meta_value
-        roles = phpserialize.loads(php_serialized_roles)
-        return [role for role, enabled in roles.iteritems() if enabled]
+        """Returns a list of all roles for the user."""
+        key = WORDPRESS_TABLE_PREFIX + 'capabilities'
+        roles = self.meta.get(meta_key=key).meta_value.encode()
+        roles = phpserialize.loads(roles, decode_strings=True)
+
+        return [role for role, enabled in roles.items() if enabled]
 
     @property
     def capabilities(self):
+        """Retrieves the user capabilities based on his roles."""
+        option = WORDPRESS_TABLE_PREFIX + 'user_roles'
         capabilities = []
-        roles_data = phpserialize.loads(
-            WpOptions.objects.using('wordpress')
-            .get(option_name='wp_user_roles').option_value)
+        roles_data = WpOptions.objects.using('wordpress') \
+            .get(option_name=option).option_value.encode()
+        roles_data = phpserialize.loads(roles_data, decode_strings=True)
+
         for role in self.roles:
             role_capabilities = roles_data.get(role).get('capabilities')
-            for capability, enabled in role_capabilities.iteritems():
+
+            for capability, enabled in role_capabilities.items():
                 if enabled:
                     capabilities.append(capability)
+
         return set(capabilities)
 
     def get_session_tokens(self):
