@@ -1,6 +1,7 @@
 import phpserialize
 
 from django.db import models
+from django.utils.encoding import force_bytes
 
 from wordpress_auth import WORDPRESS_TABLE_PREFIX
 
@@ -54,8 +55,8 @@ class WpUsers(models.Model):
     def roles(self):
         """Returns a list of all roles for the user."""
         key = WORDPRESS_TABLE_PREFIX + 'capabilities'
-        roles = self.meta.get(meta_key=key).meta_value.encode()
-        roles = phpserialize.loads(roles, decode_strings=True)
+        roles = self.meta.get(meta_key=key).meta_value
+        roles = phpserialize.loads(force_bytes(roles), decode_strings=True)
 
         return [role for role, enabled in roles.items() if enabled]
 
@@ -65,8 +66,9 @@ class WpUsers(models.Model):
         option = WORDPRESS_TABLE_PREFIX + 'user_roles'
         capabilities = []
         roles_data = WpOptions.objects.using('wordpress') \
-            .get(option_name=option).option_value.encode()
-        roles_data = phpserialize.loads(roles_data, decode_strings=True)
+            .get(option_name=option).option_value
+        roles_data = phpserialize.loads(force_bytes(roles_data),
+            decode_strings=True)
 
         for role in self.roles:
             role_capabilities = roles_data.get(role).get('capabilities')
@@ -79,7 +81,6 @@ class WpUsers(models.Model):
 
     def get_session_tokens(self):
         """Retrieve all sessions of the user."""
-        opt = self.meta.using('wordpress').get(meta_key='session_tokens') \
-            .meta_value.encode()
+        opt = self.meta.get(meta_key='session_tokens').meta_value
 
-        return phpserialize.loads(opt)
+        return phpserialize.loads(force_bytes(opt), decode_strings=True)

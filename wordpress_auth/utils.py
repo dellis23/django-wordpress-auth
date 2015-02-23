@@ -3,6 +3,7 @@ import hashlib
 from time import time
 
 from django.utils.six.moves.urllib.parse import urljoin, unquote_plus
+from django.utils.encoding import force_bytes
 
 from wordpress_auth import WORDPRESS_LOGGED_IN_KEY, WORDPRESS_LOGGED_IN_SALT
 from wordpress_auth.models import WpOptions, WpUsers
@@ -20,7 +21,7 @@ def get_login_url():
 
 
 def get_wordpress_user(request):
-    cookie_hash = hashlib.md5(get_site_url().encode()).hexdigest()
+    cookie_hash = hashlib.md5(force_bytes(get_site_url())).hexdigest()
     cookie = request.COOKIES.get('wordpress_logged_in_' + cookie_hash)
 
     if cookie:
@@ -59,19 +60,19 @@ def _validate_auth_cookie(cookie):
     pwd_frag = user.password[8:12]
     key_salt = WORDPRESS_LOGGED_IN_KEY + WORDPRESS_LOGGED_IN_SALT
     key_msg = '{}|{}|{}|{}'.format(username, pwd_frag, expiration, token)
-    key = hmac.new(key_salt.encode(), key_msg.encode(), digestmod=hashlib.md5) \
-        .hexdigest()
+    key = hmac.new(force_bytes(key_salt), force_bytes(key_msg),
+        digestmod=hashlib.md5).hexdigest()
 
     hash_msg = '{}|{}|{}'.format(username, expiration, token)
-    hash = hmac.new(key.encode(), hash_msg.encode(), digestmod=hashlib.sha256) \
-        .hexdigest()
+    hash = hmac.new(force_bytes(key), force_bytes(hash_msg),
+        digestmod=hashlib.sha256).hexdigest()
 
     if hash != cookie_hmac:
         return False
 
     # *sigh* we're almost there
     # Check if the token is valid for the given user
-    verifier = hashlib.sha256(token.encode()).hexdigest().encode()
+    verifier = hashlib.sha256(force_bytes(token)).hexdigest()
 
     if verifier not in user.get_session_tokens():
         return False
