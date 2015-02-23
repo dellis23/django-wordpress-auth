@@ -1,5 +1,5 @@
 =====================
-Django Wordpress Auth
+Django WordPress Auth
 =====================
 
 Introduction
@@ -11,11 +11,11 @@ things like login status and roles / capabilities.
 Requirements
 ============
 
-Python Dependencies :
+Python Dependencies:
 
  * `phpserialize`_
 
-Wordpress Dependencies :
+WordPress Dependencies:
 
  * `root Cookie`_
  * `Members`_
@@ -60,7 +60,7 @@ Make sure it's placed somewhere after the session middleware.
     MIDDLEWARE_CLASSES = (
         'django.contrib.sessions.middleware.SessionMiddleware',
         # ...
-        'wordpress_auth.middleware.WordpressAuthMiddleware',
+        'wordpress_auth.middleware.WordPressAuthMiddleware',
     )
 
 Finally, add `wordpress_auth` to INSTALLED_APPS.
