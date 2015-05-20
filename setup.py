@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='django-wordpress-auth',
-    version='0.1.2',
+    version='0.1.3',
     description='Django integration with WordPress authentication and roles / capabilities system.',
     long_description=open('README.rst').read(),
     include_package_data=True,
