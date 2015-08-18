@@ -23,6 +23,14 @@ WordPress Dependencies:
  .. _`phpserialize`: http://pypi.python.org/pypi/phpserialize
  .. _`root Cookie`: http://wordpress.org/extend/plugins/root-cookie/
  .. _`Members`: http://wordpress.org/extend/plugins/members/
+ 
+Alternatives to Root Cookie
+---------------------------
+
+If you are receiving warnings using *root Cookie*, please see `this issue`_ for alternative solutions.
+
+ .. _`this issue`: https://github.com/dellis23/django-wordpress-auth/issues/6
+
 
 Installation
 ============
