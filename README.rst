@@ -43,7 +43,7 @@ The `WORDPRESS_LOGGED_IN_KEY` value comes from your Wordpress installations
 
     define('LOGGED_IN_KEY',    'rs&^D%jPdu=vk|VVDsdfsdgsdgsdg9sd87f98s7h[Xm$3gT/@1xdas');
 
-while `WORDPRESS_LOGGED_IN_SALT` value comess from 
+while `WORDPRESS_LOGGED_IN_SALT` value comes from 
 
 .. sourcecode:: php
 
