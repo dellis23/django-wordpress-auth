@@ -37,6 +37,18 @@ Installation
 
 Add your WordPress's auth keys and salts (found in wp-config.php) to your settings.py.
 
+The `WORDPRESS_LOGGED_IN_KEY` value comes from your Wordpress installations
+
+.. sourcecode:: php
+
+    define('LOGGED_IN_KEY',    'rs&^D%jPdu=vk|VVDsdfsdgsdgsdg9sd87f98s7h[Xm$3gT/@1xdas');
+
+while `WORDPRESS_LOGGED_IN_SALT` value comes from 
+
+.. sourcecode:: php
+
+    define('LOGGED_IN_SALT',   '3]x^n{d8=su23902iu09jdc09asjd09asjd09jasdV-Lv-OydAQ%?~');
+
 .. sourcecode:: python
 
     WORDPRESS_LOGGED_IN_KEY = "rs&^D%jPdu=vk|VVDsdfsdgsdgsdg9sd87f98s7h[Xm$3gT/@1xdasd"
