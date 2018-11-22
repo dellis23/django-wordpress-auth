@@ -5,7 +5,8 @@ from time import time
 from django.utils.six.moves.urllib.parse import urljoin, unquote_plus
 from django.utils.encoding import force_bytes
 
-from wordpress_auth import WORDPRESS_LOGGED_IN_KEY, WORDPRESS_LOGGED_IN_SALT
+from wordpress_auth import (WORDPRESS_LOGGED_IN_KEY, WORDPRESS_LOGGED_IN_SALT,
+                            WORDPRESS_COOKIEHASH)
 from wordpress_auth.models import WpOptions, WpUsers
 
 
@@ -21,7 +22,11 @@ def get_login_url():
 
 
 def get_wordpress_user(request):
-    cookie_hash = hashlib.md5(force_bytes(get_site_url())).hexdigest()
+    if WORDPRESS_COOKIEHASH is None:
+        cookie_hash = hashlib.md5(force_bytes(get_site_url())).hexdigest()
+    else:
+        cookie_hash = WORDPRESS_COOKIEHASH
+
     cookie = request.COOKIES.get('wordpress_logged_in_' + cookie_hash)
 
     if cookie:
