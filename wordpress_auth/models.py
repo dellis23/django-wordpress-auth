@@ -20,7 +20,7 @@ class WpOptions(models.Model):
 class WpUsermeta(models.Model):
     id = models.BigIntegerField(db_column='umeta_id', primary_key=True)
     user = models.ForeignKey('wordpress_auth.WpUsers', db_column='user_id',
-        related_name='meta')
+        related_name='meta', on_delete=models.CASCADE)
     meta_key = models.CharField(max_length=765, blank=True)
     meta_value = models.TextField(blank=True)
 
