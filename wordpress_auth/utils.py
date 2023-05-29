@@ -33,9 +33,12 @@ def get_wordpress_user(request):
         cookie = unquote_plus(cookie)
         return _validate_auth_cookie(cookie)
 
-
-def _untrailingslashit(str):
-    return str.rstrip('/\\')
+def wordpress_context_processor(request):
+    return {
+        'WORDPRESS_SITE_URL': get_site_url(),
+        'WORDPRESS_LOGIN_URL': get_login_url(),
+        'WORDPRESS_USER': request.wordpress_user,
+    }
 
 
 def _parse_auth_cookie(cookie):
