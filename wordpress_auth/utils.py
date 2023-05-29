@@ -2,7 +2,8 @@ import hmac
 import hashlib
 from time import time
 
-from django.utils.six.moves.urllib.parse import urljoin, unquote_plus
+from urllib.parse import urljoin
+from urllib.parse import unquote_plus
 from django.utils.encoding import force_bytes
 
 from wordpress_auth import (WORDPRESS_LOGGED_IN_KEY, WORDPRESS_LOGGED_IN_SALT,
@@ -13,8 +14,7 @@ from wordpress_auth.models import WpOptions, WpUsers
 def get_site_url():
     url = WpOptions.objects.using('wordpress') \
         .get(option_name='siteurl').option_value
-
-    return _untrailingslashit(url)
+    return url if url.endswith('/') else url + '/'
 
 
 def get_login_url():
@@ -23,12 +23,12 @@ def get_login_url():
 
 def get_wordpress_user(request):
     if WORDPRESS_COOKIEHASH is None:
-        cookie_hash = hashlib.md5(force_bytes(get_site_url())).hexdigest()
+        cookie_hash = hashlib.md5(force_bytes(get_site_url()[:-1])).hexdigest()
     else:
         cookie_hash = WORDPRESS_COOKIEHASH
 
     cookie = request.COOKIES.get('wordpress_logged_in_' + cookie_hash)
-
+    
     if cookie:
         cookie = unquote_plus(cookie)
         return _validate_auth_cookie(cookie)
