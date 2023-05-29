@@ -83,6 +83,23 @@ Make sure it's placed somewhere after the session middleware.
         'wordpress_auth.middleware.WordPressAuthMiddleware',
     )
 
+Add the context_processors to TEMPLATES in settings.py.
+
+.. sourcecode:: python
+    
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'context_processors': [
+                    # ...
+                    'wordpress_auth.utils.wordpress_context_processor'
+                ],
+            },
+        },
+    ]
+
 Finally, add `wordpress_auth` to INSTALLED_APPS.
 
 .. sourcecode:: python
